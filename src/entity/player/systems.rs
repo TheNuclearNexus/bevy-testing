@@ -97,7 +97,8 @@ pub fn movement(
                 direction = Direction::Left;
                 state = PlayerState::Walking;
             }
-            if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
+            if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight)
+            {
                 horizontal += 1.0;
                 direction = Direction::Right;
                 state = PlayerState::Walking;
@@ -135,26 +136,26 @@ pub fn movement(
         {
             player.coyote.finish();
             player.jump.reset();
-            
+
             if is_wall_sliding && !on_ground {
-                // Wall jump: lock input temporarily and kick away from the wall
                 player.wall_jump.reset();
-                
+
                 let jump_dir = if matches!(*player.direction, Direction::Left) {
                     1.0
                 } else {
                     -1.0
                 };
-                
+
                 player.velocity.linear.x = jump_dir * player.config.speed;
-                direction = if jump_dir > 0.0 { Direction::Right } else { Direction::Left };
-                
+                direction = if jump_dir > 0.0 {
+                    Direction::Right
+                } else {
+                    Direction::Left
+                };
+
                 player.impulse.impulse.x = 0.0;
-                player.impulse.impulse.y = player.config.jump_strength * 1000.0;
-            } else {
-                // Standard jump
-                player.impulse.impulse.y += player.config.jump_strength * 1000.0;
             }
+            player.impulse.impulse.y = player.config.jump_strength * 1000.0;
         }
 
         let jump_held = keyboard_input.pressed(KeyCode::Space)
