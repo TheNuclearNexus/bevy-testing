@@ -7,7 +7,8 @@ use crate::{
     entity::{
         common::components::{Direction, Groundedness},
         player::{
-            PlayerAnimationTimer, PlayerConfig, PlayerCoyoteTimer, PlayerJumpTimer, PlayerState, PlayerWallJumpTimer,
+            PlayerAnimationTimer, PlayerConfig, PlayerCoyoteTimer, PlayerJumpTimer, PlayerState,
+            PlayerWallJumpTimer,
         },
     },
     get_single,
@@ -85,15 +86,22 @@ pub fn movement(
         let mut state = PlayerState::Idle;
         let mut direction = player.direction.clone();
 
-        if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft) {
-            horizontal -= 1.0;
-            direction = Direction::Left;
+        // 1. Check if wall jump lock is active
+        let is_wall_jump_locked = !player.wall_jump.is_finished();
+
+        if is_wall_jump_locked {
             state = PlayerState::Walking;
-        }
-        if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
-            horizontal += 1.0;
-            direction = Direction::Right;
-            state = PlayerState::Walking;
+        } else {
+            if keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft) {
+                horizontal -= 1.0;
+                direction = Direction::Left;
+                state = PlayerState::Walking;
+            }
+            if keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight) {
+                horizontal += 1.0;
+                direction = Direction::Right;
+                state = PlayerState::Walking;
+            }
         }
 
         // Wall sliding logic
@@ -113,7 +121,7 @@ pub fn movement(
         if is_wall_sliding && !on_ground {
             state = PlayerState::WallSliding;
             player.impulse.impulse.y += player.config.slide_strength * time.delta_secs() * 1000.0;
-        } else if !against_wall && player.wall_jump.is_finished() {
+        } else if !against_wall && !is_wall_jump_locked {
             player.velocity.linear.x = horizontal * player.config.speed;
         }
 
@@ -121,13 +129,31 @@ pub fn movement(
             || keyboard_input.just_pressed(KeyCode::KeyW)
             || keyboard_input.just_pressed(KeyCode::ArrowUp);
 
-        if (on_ground || is_wall_sliding || !player.coyote.is_finished()) && jump_pressed && player.jump.is_finished() {
+        if (on_ground || is_wall_sliding || !player.coyote.is_finished())
+            && jump_pressed
+            && player.jump.is_finished()
+        {
             player.coyote.finish();
             player.jump.reset();
-            player.impulse.impulse.y += player.config.jump_strength * 1000.0;
-            if is_wall_sliding && player.wall_jump.is_finished() {
-                player.velocity.linear.x = player.config.jump_strength * -horizontal.signum() * 5.0;
+            
+            if is_wall_sliding && !on_ground {
+                // Wall jump: lock input temporarily and kick away from the wall
                 player.wall_jump.reset();
+                
+                let jump_dir = if matches!(*player.direction, Direction::Left) {
+                    1.0
+                } else {
+                    -1.0
+                };
+                
+                player.velocity.linear.x = jump_dir * player.config.speed;
+                direction = if jump_dir > 0.0 { Direction::Right } else { Direction::Left };
+                
+                player.impulse.impulse.x = 0.0;
+                player.impulse.impulse.y = player.config.jump_strength * 1000.0;
+            } else {
+                // Standard jump
+                player.impulse.impulse.y += player.config.jump_strength * 1000.0;
             }
         }
 
