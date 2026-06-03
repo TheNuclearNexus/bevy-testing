@@ -11,35 +11,40 @@ pub fn update_direction(mut query: Query<(&mut Sprite, &Direction), Changed<Dire
     }
 }
 
-fn is_grounded(ctx: &RapierContext<'_>, entity: Entity, transform: &Transform) -> bool {
+fn is_grounded(
+    ctx: &RapierContext<'_>,
+    entity: Entity,
+    collider: &Collider,
+    transform: &Transform,
+) -> bool {
     let center = transform.translation.xy();
     let filter = QueryFilter::default().exclude_collider(entity);
-    let max_toi = 4.5;
+    let max_toi = 4.1;
     let dir = Vec2::new(0.0, -1.0);
 
-    let ray_center = center;
-    let ray_left = center + Vec2::new(-3.5, 0.0);
-    let ray_right = center + Vec2::new(3.5, 0.0);
-
-    ctx.cast_ray(ray_center, dir, max_toi, true, filter)
-        .is_some()
-        || ctx.cast_ray(ray_left, dir, max_toi, true, filter).is_some()
-        || ctx
-            .cast_ray(ray_right, dir, max_toi, true, filter)
-            .is_some()
+    let mut collider = collider.clone();
+    collider.set_scale(Vec2::new(0.98, 0.01), 1);
+    ctx.cast_shape(
+        center,
+        transform.rotation.to_euler(EulerRot::XYZ).2,
+        dir,
+        (&collider).into(),
+        ShapeCastOptions::with_max_time_of_impact(max_toi),
+        filter,
+    ).is_some()
 }
 
 pub fn update_groundedness(
     ctx: ReadRapierContext,
-    mut query: Query<(Entity, &mut Groundedness, &Transform)>,
+    mut query: Query<(Entity, &mut Groundedness, &Collider, &Transform)>,
 ) {
     let ctx = get_single!(ctx);
 
-    for (entity, mut groundedness, transform) in query.iter_mut() {
-        let new = is_grounded(&ctx, entity, transform);
+    for (entity, mut groundedness, collider, transform) in query.iter_mut() {
+        let new = is_grounded(&ctx, entity, collider, transform);
 
         let on_ground: bool = *groundedness.as_ref().as_ref();
-        
+
         if on_ground != new {
             groundedness.set(new)
         }

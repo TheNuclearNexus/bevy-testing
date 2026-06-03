@@ -15,7 +15,8 @@ defaults! {
     }
 }
 
-#[derive(Component, Default, PartialEq, Eq)]
+#[derive(Component, Default, PartialEq, Eq, Reflect)]
+#[reflect(Component)]
 pub enum PlayerState {
     #[default]
     Idle,
@@ -23,7 +24,8 @@ pub enum PlayerState {
     WallSliding,
 }
 
-#[derive(Component, Deref, DerefMut)]
+#[derive(Component, Deref, DerefMut, Reflect)]
+#[reflect(Component)]
 pub struct PlayerAnimationTimer(Timer);
 
 impl Default for PlayerAnimationTimer {
@@ -32,7 +34,8 @@ impl Default for PlayerAnimationTimer {
     }
 }
 
-#[derive(Component, Deref, DerefMut, Debug)]
+#[derive(Component, Deref, DerefMut, Debug, Reflect)]
+#[reflect(Component)]
 pub struct PlayerCoyoteTimer(Timer);
 
 impl Default for PlayerCoyoteTimer {
@@ -43,7 +46,8 @@ impl Default for PlayerCoyoteTimer {
     }
 }
 
-#[derive(Component, Deref, DerefMut, Debug)]
+#[derive(Component, Deref, DerefMut, Debug, Reflect)]
+#[reflect(Component)]
 pub struct PlayerJumpTimer(Timer);
 
 impl Default for PlayerJumpTimer {
@@ -54,7 +58,8 @@ impl Default for PlayerJumpTimer {
     }
 }
 
-#[derive(Component, Deref, DerefMut, Debug)]
+#[derive(Component, Deref, DerefMut, Debug, Reflect)]
+#[reflect(Component)]
 pub struct PlayerWallJumpTimer(Timer);
 
 impl Default for PlayerWallJumpTimer {

@@ -146,14 +146,8 @@ pub fn movement(
                     -1.0
                 };
 
-                player.velocity.linear.x = jump_dir * player.config.speed;
-                direction = if jump_dir > 0.0 {
-                    Direction::Right
-                } else {
-                    Direction::Left
-                };
-
-                player.impulse.impulse.x = 0.0;
+                player.velocity.linear.x = jump_dir * player.config.speed * 0.75;
+                player.velocity.linear.y = 0.0;
             }
             player.impulse.impulse.y = player.config.jump_strength * 1000.0;
         }
@@ -197,7 +191,7 @@ fn is_against_wall(
 
     ctx.cast_shape(
         center,
-        player.transform.rotation.z,
+        player.transform.rotation.to_euler(EulerRot::XYZ).2,
         dir,
         (&collider).into(),
         ShapeCastOptions::with_max_time_of_impact(max_toi),

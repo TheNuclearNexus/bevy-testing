@@ -15,6 +15,7 @@ pub struct WallBundle {
 pub fn plugin(app: &mut App) {
     app.add_plugins(LdtkPlugin)
         .register_ldtk_int_cell::<WallBundle>(1)
+        .register_ldtk_int_cell::<WallBundle>(2)
         .add_systems(Startup, setup)
         .add_systems(Update, spawn_wall_collision);
 }
