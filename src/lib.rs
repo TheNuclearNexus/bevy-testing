@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+#[cfg(feature = "dev")]
 use bevy_inspector_egui::bevy_egui::EguiPlugin;
 use bevy_rapier2d::prelude::*;
 
@@ -10,21 +11,21 @@ pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(EguiPlugin::default())
-            .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0));
+        app.add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0));
 
-        #[cfg(debug_assertions)]
-        app.add_plugins(RapierDebugRenderPlugin {
-            enabled: false,
-            ..default()
-        })
-        .add_systems(Update, update);
+        #[cfg(feature = "dev")]
+        app.add_plugins(EguiPlugin::default())
+            .add_plugins(RapierDebugRenderPlugin {
+                enabled: false,
+                ..default()
+            })
+            .add_systems(Update, update);
 
         app.add_plugins((entity::plugin, world::plugin, camera::plugin));
     }
 }
 
-#[cfg(debug_assertions)]
+#[cfg(feature = "dev")]
 fn update(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut debug_context: ResMut<DebugRenderContext>,
@@ -42,11 +43,9 @@ macro_rules! get_single {
             #[cfg(debug_assertions)]
             _ => {
                 panic!("Attempted to get_single but failed");
-            },
-            #[cfg(not(debug_assertions))]
-            _ => {
-                return
             }
+            #[cfg(not(debug_assertions))]
+            _ => return,
         }
     };
 }
