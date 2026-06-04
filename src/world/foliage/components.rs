@@ -25,11 +25,20 @@ defaults! {
     }
 }
 
+impl FoliageSensor {
+    pub fn finished() -> Self {
+        let mut sensor = Self::default();
+        sensor.timer.finish();
+        sensor
+    }
+}
+
 defaults! {
     #[derive(Clone, Bundle)]
     pub struct FoliageSensorBundle {
-        pub foliage: FoliageSensor,
-        pub collider: Collider = Collider::cuboid(0.0, 0.0),
+        pub name: Name = "Foliage Sensor".into(),
+        pub foliage: FoliageSensor = FoliageSensor::finished(),
+        pub collider: Collider = Collider::cuboid(3.0, 3.0),
         pub sensor: Sensor,
         pub active_events: ActiveEvents = ActiveEvents::empty(),
     }

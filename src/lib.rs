@@ -4,6 +4,8 @@ use bevy_inspector_egui::bevy_egui::EguiPlugin;
 use bevy_rapier2d::prelude::*;
 
 mod camera;
+#[cfg(feature = "dev")]
+pub mod dev;
 mod entity;
 mod world;
 
@@ -14,12 +16,14 @@ impl Plugin for GamePlugin {
         app.add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0));
 
         #[cfg(feature = "dev")]
-        app.add_plugins(EguiPlugin::default())
-            .add_plugins(RapierDebugRenderPlugin {
+        app.add_plugins((
+            EguiPlugin::default(),
+            RapierDebugRenderPlugin {
                 enabled: false,
                 ..default()
-            })
-            .add_systems(Update, update);
+            },
+        ))
+        .add_systems(Update, update);
 
         app.add_plugins((entity::plugin, world::plugin, camera::plugin));
     }

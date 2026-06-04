@@ -19,11 +19,11 @@ fn is_grounded(
 ) -> bool {
     let center = transform.translation.xy();
     let filter = QueryFilter::default().exclude_collider(entity);
-    let max_toi = 4.1;
+    let max_toi = 1.0;
     let dir = Vec2::new(0.0, -1.0);
 
     let mut collider = collider.clone();
-    collider.set_scale(Vec2::new(0.98, 0.01), 1);
+    collider.set_scale(Vec2::new(0.98, 1.0), 4);
     ctx.cast_shape(
         center,
         transform.rotation.to_euler(EulerRot::XYZ).2,
@@ -31,7 +31,8 @@ fn is_grounded(
         (&collider).into(),
         ShapeCastOptions::with_max_time_of_impact(max_toi),
         filter,
-    ).is_some()
+    )
+    .is_some()
 }
 
 pub fn update_groundedness(

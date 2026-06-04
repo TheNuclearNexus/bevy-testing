@@ -1,21 +1,17 @@
 use bevy::prelude::*;
-#[cfg(feature = "dev")]
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 use game::GamePlugin;
+#[cfg(feature = "dev")]
+use game::dev::editor::EditorPlugin;
 
 fn main() {
     let mut app = App::new();
 
-    app
-        .add_plugins(
-            DefaultPlugins
-                .set(ImagePlugin::default_nearest())
-        )
+    app.add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(GamePlugin);
 
     #[cfg(feature = "dev")]
-    app.add_plugins(WorldInspectorPlugin::new());
+    app.add_plugins(EditorPlugin);
 
     app.run();
 }

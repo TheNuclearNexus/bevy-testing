@@ -1,9 +1,7 @@
 use bevy::{ecs::query::QueryData, prelude::*};
-use bevy_ecs_ldtk::LdtkEntity;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    defaults,
     entity::{
         common::components::{Direction, Groundedness},
         player::{
@@ -14,31 +12,8 @@ use crate::{
     get_single,
 };
 
-defaults! {
-    #[derive(Bundle, LdtkEntity)]
-    pub struct PlayerBundle {
-        name: Name = "Player".into(),
-        rigidbody: RigidBody = RigidBody::Dynamic,
-        collider: Collider = Collider::cuboid(4.0, 4.0),
-        locked_axes: LockedAxes = LockedAxes::ROTATION_LOCKED,
-        gravity_scale: GravityScale = GravityScale(3.5),
-        direction: Direction = Direction::Left,
-        friction: Friction = Friction::new(0.0), // Prevents physical stickiness against wall colliders
-
-        config: PlayerConfig,
-        state: PlayerState,
-        animation_timer: PlayerAnimationTimer,
-        coyote_timer: PlayerCoyoteTimer,
-        jump_timer: PlayerJumpTimer,
-        wall_jump_timer: PlayerWallJumpTimer,
-        #[sprite_sheet]
-        sprite_sheet: Sprite,
-        velocity: Velocity,
-        impulse: ExternalImpulse,
-        force: ExternalForce,
-        groundedness: Groundedness,
-    }
-}
+#[cfg(feature = "dev")]
+use crate::world::PlayerReloadPosition;
 
 pub fn coyote_time(
     mut query: Query<(&Groundedness, &mut PlayerCoyoteTimer), Changed<Groundedness>>,
@@ -82,13 +57,18 @@ pub fn movement(
         player.jump.tick(time.delta());
         player.wall_jump.tick(time.delta());
 
+        // Reset the coyote timer if the player is moving up
+        if player.velocity.linear.y > 0.0 {
+            player.coyote.finish();
+        }
+
         let mut horizontal = 0.0_f32;
         let mut state = PlayerState::Idle;
         let mut direction = player.direction.clone();
 
         let on_ground = *player.groundedness.as_ref();
 
-        // 1. Check if wall jump lock is active
+        // Handle wall jump logic
         let is_wall_jump_locked = !player.wall_jump.is_finished() && !on_ground;
 
         if is_wall_jump_locked {
@@ -178,7 +158,7 @@ fn is_against_wall(
     let filter = QueryFilter::default()
         .exclude_collider(player_entity)
         .exclude_sensors();
-    let max_toi = 4.1;
+    let max_toi = 1.5;
 
     let dir = if horizontal < 0.0 {
         Vec2::new(-1.0, 0.0)
@@ -190,7 +170,7 @@ fn is_against_wall(
 
     let mut collider = player.collider.clone();
 
-    collider.set_scale(Vec2::new(1.0, 0.98), 1);
+    collider.set_scale(Vec2::new(1.0, 0.98), 4);
 
     ctx.cast_shape(
         center,
@@ -241,5 +221,33 @@ pub fn animations(time: Res<Time>, query: Query<AnimationQuery>) {
                 player.sprite.flip_x = !player.direction.flip();
             }
         }
+    }
+}
+
+#[cfg(feature = "dev")]
+#[allow(unused)]
+pub fn store_position(
+    mut reload_pos: ResMut<PlayerReloadPosition>,
+    query: Query<&Transform, With<PlayerConfig>>,
+) {
+    let Ok(player) = query.single() else {
+        return;
+    };
+
+    reload_pos.pos = Some(player.translation)
+}
+
+#[cfg(feature = "dev")]
+#[allow(unused)]
+pub fn restore_position(
+    mut reload_pos: ResMut<PlayerReloadPosition>,
+    mut query: Query<&mut Transform, Added<PlayerConfig>>,
+) {
+    let Ok(mut player) = query.single_mut() else {
+        return;
+    };
+
+    if let Some(pos) = reload_pos.pos {
+        player.translation = pos.clone();
     }
 }

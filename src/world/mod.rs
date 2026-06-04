@@ -11,6 +11,7 @@ use wall::systems::spawn_wall_collision;
 use crate::world::foliage::components::FoliageBundle;
 use crate::world::foliage::systems::spawn_foliage;
 
+#[allow(dead_code)]
 pub enum LevelLayer {
     Background,
     Collision,
@@ -27,6 +28,14 @@ impl std::fmt::Display for LevelLayer {
     }
 }
 
+#[derive(Resource, Default, Reflect)]
+#[reflect(Resource)]
+pub struct PlayerReloadPosition {
+    pub id: LevelIid,
+    pub pos: Option<Vec3>,
+    pub is_reloading: bool,
+}
+
 fn register_cell<B: Bundle + LdtkIntCell>(app: &mut App, layer: LevelLayer, cell: Option<i32>) {
     match cell {
         Some(cell) => {
@@ -40,6 +49,7 @@ fn register_cell<B: Bundle + LdtkIntCell>(app: &mut App, layer: LevelLayer, cell
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(LdtkPlugin)
+        .init_resource::<PlayerReloadPosition>()
         .add_systems(Startup, setup)
         .add_systems(
             Update,

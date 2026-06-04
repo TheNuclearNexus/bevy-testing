@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy_ecs_ldtk::{GridCoords, LayerMetadata};
@@ -55,7 +56,13 @@ pub fn update_foliage_reaction(
         let is_intersecting = ctx.intersection_pairs_with(entity).next().is_some();
 
         if is_intersecting != sensor.intersecting {
-            sensor.timer.reset();
+            if sensor.timer.is_finished() {
+                sensor.timer.reset();
+            } else {
+                let elapsed = sensor.timer.elapsed_secs();
+                let duration = sensor.timer.duration().as_secs_f32();
+                sensor.timer.set_elapsed(Duration::from_secs_f32(duration - elapsed));
+            }
             sensor.intersecting = is_intersecting;
         }
 

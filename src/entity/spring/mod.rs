@@ -4,4 +4,4 @@ mod systems;
 pub use components::*;
 pub use systems::*;
 
-pub const IDENT: &str = "Player";
+pub const IDENT: &str = "Spring";

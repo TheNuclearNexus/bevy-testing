@@ -1,6 +1,11 @@
 use bevy::prelude::*;
+use bevy_ecs_ldtk::prelude::*;
+use bevy_rapier2d::prelude::*;
 
-use crate::defaults;
+use crate::{
+    defaults,
+    entity::common::components::{Direction, Groundedness},
+};
 
 defaults! {
     #[derive(Debug, Component, Reflect)]
@@ -67,5 +72,33 @@ impl Default for PlayerWallJumpTimer {
         let mut timer = Timer::from_seconds(1.0 / 7.0, TimerMode::Once);
         timer.finish();
         Self(timer)
+    }
+}
+
+defaults! {
+    #[derive(Bundle, LdtkEntity)]
+    pub struct PlayerBundle {
+        name: Name = "Player".into(),
+        rigidbody: RigidBody = RigidBody::Dynamic,
+        collider: Collider = Collider::cuboid(4.0, 4.0),
+        locked_axes: LockedAxes = LockedAxes::ROTATION_LOCKED,
+        gravity_scale: GravityScale = GravityScale(3.5),
+        direction: Direction = Direction::Left,
+        friction: Friction = Friction::new(0.0), 
+
+        config: PlayerConfig,
+        state: PlayerState,
+        animation_timer: PlayerAnimationTimer,
+        coyote_timer: PlayerCoyoteTimer,
+        jump_timer: PlayerJumpTimer,
+        wall_jump_timer: PlayerWallJumpTimer,
+        #[sprite_sheet]
+        sprite_sheet: Sprite,
+        velocity: Velocity,
+        impulse: ExternalImpulse,
+        force: ExternalForce,
+        groundedness: Groundedness,
+
+        read_mass: ReadMassProperties
     }
 }
