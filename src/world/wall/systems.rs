@@ -4,36 +4,7 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::collections::{HashMap, HashSet};
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
-pub struct Wall;
-
-#[derive(Clone, Default, Bundle, LdtkIntCell)]
-pub struct WallBundle {
-    pub wall: Wall,
-}
-
-pub fn plugin(app: &mut App) {
-    app.add_plugins(LdtkPlugin)
-        .register_ldtk_int_cell::<WallBundle>(1)
-        .register_ldtk_int_cell::<WallBundle>(2)
-        .add_systems(Startup, setup)
-        .add_systems(Update, spawn_wall_collision);
-}
-
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // Load the levels.ldtk project from assets/platformer/
-    let ldtk_handle = asset_server.load("platformer/levels.ldtk");
-
-    commands.spawn(LdtkWorldBundle {
-        ldtk_handle: LdtkProjectHandle {
-            handle: ldtk_handle,
-        },
-        ..default()
-    });
-
-    // Select Level_0 to load
-    commands.insert_resource(LevelSelection::Identifier("Level_0".to_string()));
-}
+use crate::world::wall::components::Wall;
 
 /// Spawns wall colliders for the IntGrid wall tiles of the level.
 /// Uses a plate-merging algorithm to combine adjacent tiles and minimize physics entities.

@@ -86,8 +86,10 @@ pub fn movement(
         let mut state = PlayerState::Idle;
         let mut direction = player.direction.clone();
 
+        let on_ground = *player.groundedness.as_ref();
+
         // 1. Check if wall jump lock is active
-        let is_wall_jump_locked = !player.wall_jump.is_finished();
+        let is_wall_jump_locked = !player.wall_jump.is_finished() && !on_ground;
 
         if is_wall_jump_locked {
             state = PlayerState::Walking;
@@ -106,7 +108,6 @@ pub fn movement(
         }
 
         // Wall sliding logic
-        let on_ground = *player.groundedness.as_ref();
         let against_wall = is_against_wall(&ctx, player_entity, &player, horizontal);
 
         let mut is_wall_sliding = false;
@@ -174,7 +175,9 @@ fn is_against_wall(
     player: &MovementQueryItem<'_, '_>,
     horizontal: f32,
 ) -> bool {
-    let filter = QueryFilter::default().exclude_collider(player_entity);
+    let filter = QueryFilter::default()
+        .exclude_collider(player_entity)
+        .exclude_sensors();
     let max_toi = 4.1;
 
     let dir = if horizontal < 0.0 {

@@ -1,10 +1,8 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::app::LdtkEntityAppExt;
 
-use crate::entity::player::PlayerBundle;
-
-pub mod player;
 pub mod common;
+pub mod player;
 
 pub fn plugin(app: &mut App) {
     app
@@ -20,13 +18,17 @@ pub fn plugin(app: &mut App) {
         .register_type::<player::PlayerWallJumpTimer>()
         .register_type::<player::PlayerState>()
         /* -- Register LDTK entities -- */
-        .register_ldtk_entity::<PlayerBundle>("Player")
+        .register_ldtk_entity::<player::PlayerBundle>(player::IDENT)
         /* -- Systems -- */
-        .add_systems(Update, (
-            common::systems::update_groundedness,
-            player::coyote_time,
-            player::movement, 
-            common::systems::update_direction,
-            player::animations,
-        ).chain());
+        .add_systems(
+            Update,
+            (
+                common::systems::update_groundedness,
+                player::coyote_time,
+                player::movement,
+                common::systems::update_direction,
+                player::animations,
+            )
+                .chain(),
+        );
 }
