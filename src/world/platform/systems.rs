@@ -10,16 +10,16 @@ pub struct PlatformHook<'w, 's> {
 
 impl<'w, 's> BevyPhysicsHooks for PlatformHook<'w, 's> {
     fn modify_solver_contacts(&self, ctx: ContactModificationContextView) {
-        let platform = if let Ok(p) = self.platforms.get(ctx.collider1()) {
-            p
+        let (platform, normal) = if let Ok(p) = self.platforms.get(ctx.collider1()) {
+            (p, Vec2::Y)
         } else if let Ok(p) = self.platforms.get(ctx.collider2()) {
-            p
+            (p, -Vec2::Y)
         } else {
             return;
         };
 
 
         ctx.raw
-            .update_as_oneway_platform(-Vec2::Y, platform.allowed_angle);
+            .update_as_oneway_platform(normal, platform.allowed_angle);
     }
 }
