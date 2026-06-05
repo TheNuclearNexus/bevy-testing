@@ -17,13 +17,16 @@ fn is_grounded(
     collider: &Collider,
     transform: &Transform,
 ) -> bool {
-    let center = transform.translation.xy();
-    let filter = QueryFilter::default().exclude_collider(entity);
-    let max_toi = 1.0;
+    let mut center = transform.translation.xy();
+    center.y -= 4.0;
+    let filter = QueryFilter::default()
+        .exclude_collider(entity)
+        .exclude_sensors();
+    let max_toi = 0.01;
     let dir = Vec2::new(0.0, -1.0);
 
     let mut collider = collider.clone();
-    collider.set_scale(Vec2::new(0.98, 1.0), 4);
+    collider.set_scale(Vec2::new(0.98, 0.01), 4);
     ctx.cast_shape(
         center,
         transform.rotation.to_euler(EulerRot::XYZ).2,

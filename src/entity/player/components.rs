@@ -20,13 +20,16 @@ defaults! {
     }
 }
 
-#[derive(Component, Default, PartialEq, Eq, Reflect)]
+#[derive(Component, Default, PartialEq, Reflect)]
 #[reflect(Component)]
 pub enum PlayerState {
     #[default]
     Idle,
     Walking,
     WallSliding,
+    Climbing {
+        x: f32,
+    },
 }
 
 #[derive(Component, Deref, DerefMut, Reflect)]
@@ -45,7 +48,7 @@ pub struct PlayerCoyoteTimer(Timer);
 
 impl Default for PlayerCoyoteTimer {
     fn default() -> Self {
-        let mut timer = Timer::from_seconds(1.0 / 6.0, TimerMode::Once);
+        let mut timer = Timer::from_seconds(1.0 / 9.0, TimerMode::Once);
         timer.finish();
         Self(timer)
     }
@@ -84,7 +87,7 @@ defaults! {
         locked_axes: LockedAxes = LockedAxes::ROTATION_LOCKED,
         gravity_scale: GravityScale = GravityScale(3.5),
         direction: Direction = Direction::Left,
-        friction: Friction = Friction::new(0.0), 
+        friction: Friction = Friction::new(0.0),
 
         config: PlayerConfig,
         state: PlayerState,

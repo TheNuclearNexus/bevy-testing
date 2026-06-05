@@ -39,7 +39,7 @@ defaults! {
         config: SpringConfig,
         timer: SpringTimer,
         launch_force: SpringLaunchForce,
-        
+
         #[sprite_sheet]
         sprite_sheet: Sprite,
     }

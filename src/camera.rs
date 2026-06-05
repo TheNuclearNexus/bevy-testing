@@ -1,6 +1,4 @@
 use bevy::{camera::ScalingMode, prelude::*};
-#[cfg(feature = "dev")]
-use bevy_inspector_egui::bevy_egui::PrimaryEguiContext;
 use bevy_rapier2d::plugin::PhysicsSet;
 #[cfg(feature = "dev")]
 use transform_gizmo_bevy::GizmoCamera;
@@ -17,12 +15,13 @@ pub struct GameCamera;
 
 fn setup(mut commands: Commands) {
     // 1. Spawn a 2D Camera, positioned to view the loaded LDTK level
-    let mut camera = commands.spawn((
+    let _camera = commands.spawn((
         Name::new("Main Camera"),
         Camera2d,
         Projection::Orthographic(OrthographicProjection {
-            scaling_mode: ScalingMode::WindowSize,
-            scale: 1.0 / 4.0,
+            scaling_mode: ScalingMode::FixedVertical {
+                viewport_height: 16.0 * 8.0,
+            },
             ..OrthographicProjection::default_2d()
         }),
         GameCamera,
@@ -30,7 +29,10 @@ fn setup(mut commands: Commands) {
     ));
 
     #[cfg(feature = "dev")]
-    camera.insert((GizmoCamera, PrimaryEguiContext));
+    {
+        let mut camera = _camera;
+        camera.insert(GizmoCamera);
+    }
 }
 
 fn update(

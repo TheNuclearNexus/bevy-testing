@@ -40,8 +40,9 @@ pub fn plugin(app: &mut App) {
         );
 
     #[cfg(feature = "dev")]
-    app.add_systems(
-        Update,
-        (player::restore_position, player::store_position).chain(),
-    );
+    app.init_resource::<player::PlayerReloadPosition>()
+        .add_systems(
+            Update,
+            (player::restore_position, player::store_position).chain(),
+        );
 }

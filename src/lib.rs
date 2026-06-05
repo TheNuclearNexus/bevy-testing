@@ -3,6 +3,8 @@ use bevy::prelude::*;
 use bevy_inspector_egui::bevy_egui::EguiPlugin;
 use bevy_rapier2d::prelude::*;
 
+use crate::world::platform::systems::PlatformHook;
+
 mod camera;
 #[cfg(feature = "dev")]
 pub mod dev;
@@ -13,7 +15,7 @@ pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(8.0));
+        app.add_plugins(RapierPhysicsPlugin::<PlatformHook>::pixels_per_meter(8.0));
 
         #[cfg(feature = "dev")]
         app.add_plugins((

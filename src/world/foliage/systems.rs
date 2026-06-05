@@ -61,7 +61,9 @@ pub fn update_foliage_reaction(
             } else {
                 let elapsed = sensor.timer.elapsed_secs();
                 let duration = sensor.timer.duration().as_secs_f32();
-                sensor.timer.set_elapsed(Duration::from_secs_f32(duration - elapsed));
+                sensor
+                    .timer
+                    .set_elapsed(Duration::from_secs_f32(duration - elapsed));
             }
             sensor.intersecting = is_intersecting;
         }

@@ -338,5 +338,6 @@ fn setup(mut commands: Commands, mut egui_global_settings: ResMut<EguiGlobalSett
             clear_color: ClearColorConfig::None,
             ..default()
         },
+        PrimaryEguiContext,
     ));
 }
